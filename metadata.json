@@ -1,0 +1,7 @@
+{
+  "name": "Vintage Photobooth",
+  "description": "A retro-themed photobooth application that lets you capture photos and apply stylish vintage frames. Save and download your memories with a classic touch.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
