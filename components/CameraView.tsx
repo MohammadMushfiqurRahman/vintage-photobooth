@@ -1,10 +1,10 @@
 
 import React, { useRef, useState, useEffect, useCallback } from 'react';
+import type { Frame } from '../types';
 
 interface CameraViewProps {
   onCapture: (dataUrl: string) => void;
-  frameClassName: string;
-  frameName: string;
+  frame: Frame;
 }
 
 const CountdownOverlay: React.FC<{ count: number }> = ({ count }) => (
@@ -28,7 +28,7 @@ const FlashOverlay: React.FC = () => (
 );
 
 
-export const CameraView: React.FC<CameraViewProps> = ({ onCapture, frameClassName, frameName }) => {
+export const CameraView: React.FC<CameraViewProps> = ({ onCapture, frame }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isCameraReady, setIsCameraReady] = useState(false);
@@ -97,9 +97,9 @@ export const CameraView: React.FC<CameraViewProps> = ({ onCapture, frameClassNam
 
   return (
     <div className="w-full max-w-2xl mx-auto flex flex-col items-center gap-4">
-        <div className="relative w-full aspect-[4/3] bg-black rounded-lg overflow-hidden shadow-2xl flex items-center justify-center">
-            <div className={`w-full h-full absolute inset-0 z-10 pointer-events-none transition-all duration-300 flex items-center justify-center ${frameClassName}`}>
-                 {frameName === 'Classic Polaroid' && (
+        <div style={{ aspectRatio: frame.aspectRatio }} className="relative w-full bg-black rounded-lg overflow-hidden shadow-2xl flex items-center justify-center">
+            <div className={`w-full h-full absolute inset-0 z-10 pointer-events-none transition-all duration-300 flex items-center justify-center ${frame.className}`}>
+                 {frame.name === 'Classic Polaroid' && (
                     <p className="absolute bottom-4 font-display text-stone-700 text-2xl">Your Memory</p>
                 )}
             </div>
