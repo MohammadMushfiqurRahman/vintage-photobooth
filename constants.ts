@@ -36,5 +36,26 @@ export const FRAMES: Frame[] = [
     className: 'bg-transparent p-2 border-4 border-stone-200',
     previewClassName: 'bg-transparent p-1 border-2 border-stone-200',
     aspectRatio: '3/4'
+  },
+  {
+    id: 'vintage-wood',
+    name: 'Vintage Wood',
+    className: 'bg-yellow-900 p-8 border-4 border-yellow-950 shadow-2xl',
+    previewClassName: 'bg-yellow-900 p-2 border-2 border-yellow-950 shadow-md',
+    aspectRatio: '3/4'
+  },
+  {
+    id: 'retro-tv',
+    name: 'Retro TV',
+    className: 'bg-stone-800 p-12 border-8 border-stone-700 rounded-3xl shadow-2xl relative',
+    previewClassName: 'bg-stone-800 p-3 border-2 border-stone-700 rounded-md shadow-md',
+    aspectRatio: '3/4'
+  },
+  {
+    id: 'techno',
+    name: 'Techno',
+    className: 'bg-indigo-900 p-4 border-4 border-dashed border-indigo-400 shadow-2xl shadow-indigo-500/50',
+    previewClassName: 'bg-indigo-900 p-1 border-2 border-dashed border-indigo-400 shadow-md',
+    aspectRatio: '3/4'
   }
 ];
