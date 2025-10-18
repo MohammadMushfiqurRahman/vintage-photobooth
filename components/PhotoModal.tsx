@@ -65,7 +65,15 @@ export const PhotoModal: React.FC<PhotoModalProps> = ({ photo, frame, onClose })
           ref={framedPhotoRef}
           className={`${frame.className} w-full aspect-[3/4] flex items-center justify-center`}
         >
-             <img src={photo.dataUrl} alt="Captured moment" className="w-full h-full object-cover transform -scale-x-100" />
+            {frame.photoCount > 1 ? (
+              <div className="w-full h-full grid grid-rows-2 gap-2">
+                {photo.dataUrls.map((url, index) => (
+                  <img key={index} src={url} alt={`Captured moment ${index + 1}`} className="w-full h-full object-cover transform -scale-x-100" />
+                ))}
+              </div>
+            ) : (
+              <img src={photo.dataUrls[0]} alt="Captured moment" className="w-full h-full object-cover transform -scale-x-100" />
+            )}
              {frame.name === 'Classic Polaroid' && (
                 <p className="absolute bottom-4 font-display text-stone-700 text-2xl">Your Memory</p>
             )}

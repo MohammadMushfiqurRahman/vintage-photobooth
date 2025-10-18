@@ -5,10 +5,11 @@ export interface Frame {
   className: string;
   previewClassName: string;
   aspectRatio: string;
+  photoCount: number;
 }
 
 export interface CapturedPhoto {
   id: string;
-  dataUrl: string;
+  dataUrls: string[];
   frameId: string;
 }

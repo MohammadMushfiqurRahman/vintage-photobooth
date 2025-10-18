@@ -3,7 +3,7 @@ import React, { useRef, useState, useEffect, useCallback } from 'react';
 import type { Frame } from '../types';
 
 interface CameraViewProps {
-  onCapture: (dataUrl: string) => void;
+  onCapture: (dataUrls: string[]) => void;
   frame: Frame;
 }
 
@@ -35,6 +35,12 @@ export const CameraView: React.FC<CameraViewProps> = ({ onCapture, frame }) => {
   const [error, setError] = useState<string | null>(null);
   const [countdown, setCountdown] = useState<number | null>(null);
   const [isFlashing, setIsFlashing] = useState(false);
+  const [capturedDataUrls, setCapturedDataUrls] = useState<string[]>([]);
+
+  useEffect(() => {
+    // Reset captured photos when the frame changes
+    setCapturedDataUrls([]);
+  }, [frame]);
 
   useEffect(() => {
     const enableCamera = async () => {
@@ -69,6 +75,17 @@ export const CameraView: React.FC<CameraViewProps> = ({ onCapture, frame }) => {
     setCountdown(3);
   }, [isCameraReady, countdown]);
 
+  const handleNextPhoto = () => {
+    if (capturedDataUrls.length < frame.photoCount) {
+      setCountdown(3);
+    }
+  };
+
+  const handleFinish = () => {
+    onCapture(capturedDataUrls);
+    setCapturedDataUrls([]);
+  };
+
   useEffect(() => {
     if (countdown === null) return;
     if (countdown > 0) {
@@ -88,18 +105,35 @@ export const CameraView: React.FC<CameraViewProps> = ({ onCapture, frame }) => {
           canvas.height = videoHeight;
           context.drawImage(video, 0, 0, videoWidth, videoHeight);
           const dataUrl = canvas.toDataURL('image/png');
-          onCapture(dataUrl);
+          
+          const newUrls = [...capturedDataUrls, dataUrl];
+          setCapturedDataUrls(newUrls);
+
+          if (newUrls.length === frame.photoCount) {
+            if (frame.photoCount === 1) {
+              onCapture(newUrls);
+              setCapturedDataUrls([]);
+            }
+          }
         }
       }
       setCountdown(null);
     }
-  }, [countdown, onCapture]);
+  }, [countdown, onCapture, frame.photoCount, capturedDataUrls]);
+
+  const isCaptureComplete = capturedDataUrls.length >= frame.photoCount;
 
   return (
     <div className="w-full max-w-2xl mx-auto flex flex-col items-center gap-4">
-        <div style={{ aspectRatio: frame.aspectRatio }} className="relative w-full bg-black rounded-lg overflow-hidden shadow-2xl flex items-center justify-center">
+        <div style={{ aspectRatio: frame.aspectRatio }} className={`relative w-full bg-black rounded-lg overflow-hidden shadow-2xl flex items-center justify-center`}>
             <div className={`w-full h-full absolute inset-0 z-10 pointer-events-none transition-all duration-300 flex items-center justify-center ${frame.className}`}>
-                 {frame.name === 'Classic Polaroid' && (
+                {frame.photoCount > 1 ? (
+                    <div className="w-full h-full grid grid-rows-2 gap-2">
+                        {capturedDataUrls.map((url, index) => (
+                            <img key={index} src={url} className="w-full h-full object-cover transform -scale-x-100" />
+                        ))}
+                    </div>
+                ) : frame.name === 'Classic Polaroid' && (
                     <p className="absolute bottom-4 font-display text-stone-700 text-2xl">Your Memory</p>
                 )}
             </div>
@@ -111,7 +145,7 @@ export const CameraView: React.FC<CameraViewProps> = ({ onCapture, frame }) => {
                 autoPlay
                 playsInline
                 muted
-                className="w-full h-full object-cover transform -scale-x-100"
+                className={`w-full h-full object-cover transform -scale-x-100 ${capturedDataUrls.length > 0 ? 'opacity-0' : 'opacity-100'}`}
             />
              {!isCameraReady && (
                 <div className="absolute inset-0 bg-black bg-opacity-50 flex flex-col items-center justify-center text-white">
@@ -124,15 +158,22 @@ export const CameraView: React.FC<CameraViewProps> = ({ onCapture, frame }) => {
             )}
         </div>
         <canvas ref={canvasRef} className="hidden" />
-        <button
-            onClick={handleCaptureClick}
-            disabled={!isCameraReady || countdown !== null}
-            className="group relative w-24 h-24 rounded-full bg-red-600 hover:bg-red-700 disabled:bg-gray-500 disabled:cursor-not-allowed transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-red-400 focus:ring-opacity-50 shadow-lg"
-        >
-            <div className="absolute inset-0.5 rounded-full bg-red-500 group-hover:bg-red-600 transition-colors"></div>
-            <div className="absolute inset-2 rounded-full border-4 border-red-700 group-hover:border-red-800 transition-colors"></div>
-            <span className="sr-only">Capture Photo</span>
-        </button>
+        
+        {isCaptureComplete && frame.photoCount > 1 ? (
+            <button onClick={handleFinish} className="bg-green-500 text-white font-bold py-3 px-8 rounded-lg hover:bg-green-600 transition-colors shadow-lg">Finish</button>
+        ) : frame.photoCount > 1 && capturedDataUrls.length > 0 ? (
+            <button onClick={handleNextPhoto} className="bg-blue-500 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-600 transition-colors shadow-lg">Next Photo</button>
+        ) : (
+            <button
+                onClick={handleCaptureClick}
+                disabled={!isCameraReady || countdown !== null || isCaptureComplete}
+                className="group relative w-24 h-24 rounded-full bg-red-600 hover:bg-red-700 disabled:bg-gray-500 disabled:cursor-not-allowed transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-red-400 focus:ring-opacity-50 shadow-lg"
+            >
+                <div className="absolute inset-0.5 rounded-full bg-red-500 group-hover:bg-red-600 transition-colors"></div>
+                <div className="absolute inset-2 rounded-full border-4 border-red-700 group-hover:border-red-800 transition-colors"></div>
+                <span className="sr-only">Capture Photo</span>
+            </button>
+        )}
     </div>
   );
 };

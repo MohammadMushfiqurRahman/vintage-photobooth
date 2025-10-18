@@ -28,7 +28,15 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({ photos, frames, onSe
                 className="cursor-pointer group relative"
               >
                 <div className={`${frame.previewClassName} w-full aspect-[3/4] flex items-center justify-center transition-transform duration-300 group-hover:scale-105`}>
-                  <img src={photo.dataUrl} alt="Captured moment" className="w-full h-full object-cover transform -scale-x-100" />
+                  {frame.photoCount > 1 ? (
+                    <div className="w-full h-full grid grid-rows-2 gap-1">
+                      {photo.dataUrls.map((url, index) => (
+                        <img key={index} src={url} alt={`Captured moment ${index + 1}`} className="w-full h-full object-cover transform -scale-x-100" />
+                      ))}
+                    </div>
+                  ) : (
+                    <img src={photo.dataUrls[0]} alt="Captured moment" className="w-full h-full object-cover transform -scale-x-100" />
+                  )}
                 </div>
                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-300 flex items-center justify-center">
                     <p className="text-white text-lg font-bold opacity-0 group-hover:opacity-100">View</p>

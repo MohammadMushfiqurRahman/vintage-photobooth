@@ -12,10 +12,10 @@ const App: React.FC = () => {
   const [selectedFrameId, setSelectedFrameId] = useState<string>(FRAMES[0].id);
   const [modalPhoto, setModalPhoto] = useState<CapturedPhoto | null>(null);
 
-  const handleCapture = useCallback((dataUrl: string) => {
+  const handleCapture = useCallback((dataUrls: string[]) => {
     const newPhoto: CapturedPhoto = {
       id: `photo-${Date.now()}`,
-      dataUrl,
+      dataUrls,
       frameId: selectedFrameId,
     };
     setPhotos(prevPhotos => [newPhoto, ...prevPhotos]);
