@@ -6,8 +6,6 @@
 
 This is a single-page React application built with Vite and TypeScript. It's designed to be a "vintage photobooth" experience, allowing users to capture photos with different frames.
 
-View your app in AI Studio: https://ai.studio/apps/drive/1uryMFUVpCaGE88pOQydxOLxP4Tt2LnAy
-
 ## Run Locally
 
 **Prerequisites:**  Node.js
