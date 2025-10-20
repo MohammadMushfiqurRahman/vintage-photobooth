@@ -122,6 +122,7 @@ export const CameraView: React.FC<CameraViewProps> = ({ onCapture, frame }) => {
   }, [countdown, onCapture, frame.photoCount, capturedDataUrls]);
 
   const isCaptureComplete = capturedDataUrls.length >= frame.photoCount;
+  const isReadyToCapture = isCameraReady && !isCaptureComplete && countdown === null;
 
   return (
     <div className="w-full max-w-2xl mx-auto flex flex-col items-center gap-4">
@@ -166,9 +167,34 @@ export const CameraView: React.FC<CameraViewProps> = ({ onCapture, frame }) => {
         ) : (
             <button
                 onClick={handleCaptureClick}
-                disabled={!isCameraReady || countdown !== null || isCaptureComplete}
-                className="group relative w-24 h-24 rounded-full bg-red-600 hover:bg-red-700 disabled:bg-gray-500 disabled:cursor-not-allowed transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-red-400 focus:ring-opacity-50 shadow-lg"
+                disabled={!isReadyToCapture}
+                className={`group relative w-24 h-24 rounded-full bg-red-600 hover:bg-red-700 disabled:bg-gray-500 disabled:cursor-not-allowed transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-red-400 focus:ring-opacity-50 shadow-lg ${
+                    isReadyToCapture ? 'animate-pulse' : ''
+                }`}
             >
+                 {countdown !== null && (
+                    <svg className="absolute inset-0 w-full h-full" viewBox="0 0 36 36">
+                        <path
+                            className="text-red-700/50"
+                            d="M18 2.0845
+                            a 15.9155 15.9155 0 0 1 0 31.831
+                            a 15.9155 15.9155 0 0 1 0 -31.831"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                        />
+                        <path
+                            className="text-red-400 transition-all duration-1000 ease-linear"
+                            d="M18 2.0845
+                            a 15.9155 15.9155 0 0 1 0 31.831
+                            a 15.9155 15.9155 0 0 1 0 -31.831"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                            strokeDasharray={`${((3 - countdown) / 3) * 100}, 100`}
+                        />
+                    </svg>
+                )}
                 <div className="absolute inset-0.5 rounded-full bg-red-500 group-hover:bg-red-600 transition-colors"></div>
                 <div className="absolute inset-2 rounded-full border-4 border-red-700 group-hover:border-red-800 transition-colors"></div>
                 <span className="sr-only">Capture Photo</span>
