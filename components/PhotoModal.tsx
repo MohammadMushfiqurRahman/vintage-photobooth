@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import type { CapturedPhoto, Frame } from '../types';
 
 // Add html2canvas to the window object for TypeScript
@@ -24,24 +24,36 @@ const FILTERS = [
 export const PhotoModal: React.FC<PhotoModalProps> = ({ photo, frame, onClose }) => {
   const framedPhotoRef = useRef<HTMLDivElement>(null);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [isSharing, setIsSharing] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState(FILTERS[0].className);
+  const [isShareSupported, setIsShareSupported] = useState(false);
 
-  const handleDownload = async () => {
-    if (!framedPhotoRef.current || isDownloading) return;
-    
+  useEffect(() => {
+    if (navigator.share && navigator.canShare) {
+      setIsShareSupported(true);
+    }
+  }, []);
+
+  const getCanvas = async (): Promise<HTMLCanvasElement | null> => {
+    if (!framedPhotoRef.current) return null;
     if (typeof window.html2canvas === 'undefined') {
       console.error("html2canvas library is not available.");
-      alert("Download feature is currently unavailable. Please try again later.");
-      return;
+      alert("Feature is currently unavailable. Please try again later.");
+      return null;
     }
+    return await window.html2canvas(framedPhotoRef.current, {
+      scale: 2,
+      backgroundColor: null,
+      useCORS: true,
+    });
+  };
 
+  const handleDownload = async () => {
     setIsDownloading(true);
     try {
-      const canvas = await window.html2canvas(framedPhotoRef.current, {
-        scale: 2,
-        backgroundColor: null,
-        useCORS: true,
-      });
+      const canvas = await getCanvas();
+      if (!canvas) return;
+
       const dataUrl = canvas.toDataURL('image/png');
       const link = document.createElement('a');
       link.href = dataUrl;
@@ -54,6 +66,39 @@ export const PhotoModal: React.FC<PhotoModalProps> = ({ photo, frame, onClose })
       alert("An error occurred while preparing your photo for download.");
     } finally {
       setIsDownloading(false);
+    }
+  };
+
+  const handleShare = async () => {
+    setIsSharing(true);
+    try {
+      const canvas = await getCanvas();
+      if (!canvas) return;
+
+      canvas.toBlob(async (blob) => {
+        if (!blob) {
+          alert("Could not create image file to share.");
+          setIsSharing(false);
+          return;
+        }
+        const fileName = `photobooth-${photo.id}-${selectedFilter || 'original'}.png`;
+        const file = new File([blob], fileName, { type: 'image/png' });
+
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            files: [file],
+            title: 'My Vintage Photobooth Picture',
+            text: 'Check out this picture I took!',
+          });
+        } else {
+          alert("Your browser does not support sharing files.");
+        }
+        setIsSharing(false);
+      }, 'image/png');
+    } catch (error) {
+      console.error("Error sharing photo:", error);
+      alert("An error occurred while preparing your photo for sharing.");
+      setIsSharing(false);
     }
   };
 
@@ -110,7 +155,7 @@ export const PhotoModal: React.FC<PhotoModalProps> = ({ photo, frame, onClose })
         <div className="mt-4 flex justify-center gap-4">
             <button
                 onClick={handleDownload}
-                disabled={isDownloading}
+                disabled={isDownloading || isSharing}
                 className="bg-amber-500 text-stone-900 font-bold py-2 px-6 rounded-lg hover:bg-amber-400 transition-colors shadow-lg flex items-center gap-2 disabled:bg-amber-300 disabled:cursor-wait"
             >
                 {isDownloading ? (
@@ -125,6 +170,25 @@ export const PhotoModal: React.FC<PhotoModalProps> = ({ photo, frame, onClose })
                 )}
                 {isDownloading ? 'Preparing...' : 'Download'}
             </button>
+            {isShareSupported && (
+              <button
+                  onClick={handleShare}
+                  disabled={isSharing || isDownloading}
+                  className="bg-sky-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-sky-400 transition-colors shadow-lg flex items-center gap-2 disabled:bg-sky-300 disabled:cursor-wait"
+              >
+                  {isSharing ? (
+                      <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                      <path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z" />
+                    </svg>
+                  )}
+                  {isSharing ? 'Sharing...' : 'Share'}
+              </button>
+            )}
             <button
                 onClick={onClose}
                 className="bg-stone-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-stone-500 transition-colors shadow-lg flex items-center gap-2"
