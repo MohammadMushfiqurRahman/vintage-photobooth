@@ -14,9 +14,17 @@ interface PhotoModalProps {
   onClose: () => void;
 }
 
+const FILTERS = [
+  { name: 'None', className: '' },
+  { name: 'Sepia', className: 'sepia' },
+  { name: 'B&W', className: 'grayscale' },
+  { name: 'Vintage', className: 'vintage' },
+];
+
 export const PhotoModal: React.FC<PhotoModalProps> = ({ photo, frame, onClose }) => {
   const framedPhotoRef = useRef<HTMLDivElement>(null);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [selectedFilter, setSelectedFilter] = useState(FILTERS[0].className);
 
   const handleDownload = async () => {
     if (!framedPhotoRef.current || isDownloading) return;
@@ -30,17 +38,14 @@ export const PhotoModal: React.FC<PhotoModalProps> = ({ photo, frame, onClose })
     setIsDownloading(true);
     try {
       const canvas = await window.html2canvas(framedPhotoRef.current, {
-        // Use a higher scale for better resolution
         scale: 2,
-        // Set a transparent background to correctly capture shadows and rotations
         backgroundColor: null,
-        // Allow cross-origin images (good practice even for data URLs)
         useCORS: true,
       });
       const dataUrl = canvas.toDataURL('image/png');
       const link = document.createElement('a');
       link.href = dataUrl;
-      link.download = `photobooth-${photo.id}.png`;
+      link.download = `photobooth-${photo.id}-${selectedFilter || 'original'}.png`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -57,13 +62,18 @@ export const PhotoModal: React.FC<PhotoModalProps> = ({ photo, frame, onClose })
       className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4"
       onClick={onClose}
     >
+      <style>{`
+        .sepia img { filter: sepia(1); }
+        .grayscale img { filter: grayscale(1); }
+        .vintage img { filter: contrast(1.1) brightness(0.9) saturate(0.8); }
+      `}</style>
       <div 
         className="relative max-w-lg w-full"
         onClick={(e) => e.stopPropagation()}
       >
         <div 
           ref={framedPhotoRef}
-          className={`${frame.className} w-full aspect-[3/4] flex items-center justify-center`}
+          className={`${frame.className} w-full aspect-[3/4] flex items-center justify-center ${selectedFilter}`}
         >
             {frame.photoCount > 1 ? (
               <div className="w-full h-full grid grid-rows-2 gap-2">
@@ -78,8 +88,26 @@ export const PhotoModal: React.FC<PhotoModalProps> = ({ photo, frame, onClose })
                 <p className="absolute bottom-4 font-display text-stone-700 text-2xl">Your Memory</p>
             )}
         </div>
+
+        <div className="mt-4 bg-stone-800/50 p-3 rounded-lg">
+            <h4 className="text-center text-amber-100 text-lg font-display mb-2">Apply a Filter</h4>
+            <div className="flex justify-center gap-3">
+                {FILTERS.map(filter => (
+                    <button 
+                        key={filter.name}
+                        onClick={() => setSelectedFilter(filter.className)}
+                        className={`px-4 py-2 text-sm font-bold rounded-md transition-colors ${
+                            selectedFilter === filter.className 
+                            ? 'bg-amber-500 text-stone-900' 
+                            : 'bg-stone-600 text-white hover:bg-stone-500'
+                        }`}>
+                        {filter.name}
+                    </button>
+                ))}
+            </div>
+        </div>
         
-        <div className="mt-6 flex justify-center gap-4">
+        <div className="mt-4 flex justify-center gap-4">
             <button
                 onClick={handleDownload}
                 disabled={isDownloading}
