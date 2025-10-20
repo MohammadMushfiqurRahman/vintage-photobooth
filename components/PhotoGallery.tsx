@@ -25,9 +25,9 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({ photos, frames, onSe
               <div
                 key={photo.id}
                 onClick={() => onSelectPhoto(photo)}
-                className="cursor-pointer group relative"
+                className="cursor-pointer group relative overflow-hidden rounded-lg"
               >
-                <div className={`${frame.previewClassName} w-full aspect-[3/4] flex items-center justify-center transition-transform duration-300 group-hover:scale-105`}>
+                <div className={`${frame.previewClassName} w-full aspect-[3/4] flex items-center justify-center transition-transform duration-300 group-hover:scale-110`}>
                   {frame.photoCount > 1 ? (
                     <div className="w-full h-full grid grid-rows-2 gap-1">
                       {photo.dataUrls.map((url, index) => (
