@@ -14,14 +14,24 @@ This is a single-page React application built with Vite and TypeScript that prov
 *   **Photo Modal**: View a larger version of your photo, apply filters, and download the final image.
 *   **Shareable Images**: Share your creations with friends and family.
 
-## Run Locally
+## Getting Started
 
 **Prerequisites:** Node.js
 
-1.  Install dependencies:
-    `npm install`
-2.  Run the app:
-    `npm run dev`
+1.  Clone the repository:
+    ```bash
+    git clone https://github.com/your-username/vintage-photobooth.git
+    ```
+2.  Install dependencies:
+    ```bash
+    npm install
+    ```
+
+## Available Scripts
+
+*   `npm run dev`: Runs the app in the development mode.
+*   `npm run build`: Builds the app for production to the `dist` folder.
+*   `npm run preview`: Serves the production build locally.
 
 ## Technologies Used
 
