@@ -13,7 +13,7 @@ export const FRAMES: Frame[] = [
   {
     id: 'photo-strip',
     name: 'Photo Strip',
-    className: 'bg-stone-100 p-2 shadow-lg border border-stone-300 relative grid grid-rows-2 gap-2',
+    //className: 'bg-stone-100 p-2 shadow-lg border border-stone-300 relative grid grid-rows-2 gap-2',
     previewClassName: 'bg-stone-100 p-1 shadow-md border border-stone-300 grid grid-rows-2 gap-1',
     aspectRatio: '3/8',
     photoCount: 2
